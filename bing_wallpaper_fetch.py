@@ -65,7 +65,7 @@ def show_help(name):
 	print('Usage: python3 {} [OPTIONS]... '.format(name))
 	print('Fetch Bing Wallpaper images (according to the Bing\'s API restrictions fetching only the last 16 images is allowed)')
 	print('  -c, --count=[COUNT]\t\t\tThe number of images to fetch')
-	print('  -d, --output-directory=[DIRECTORY]\tOutput directory to put the images to')
+	print('  -d, --output-directory=[DIRECTORY]\tOutput directory to put the images to. If omitted, current directory is used')
 
 
 if __name__ == '__main__':	
