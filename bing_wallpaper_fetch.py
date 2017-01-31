@@ -4,6 +4,7 @@ import json
 import wget
 import sys
 import getopt
+import os
 
 def get_image_names(n):
 	images = {}
@@ -21,10 +22,11 @@ def get_image_names(n):
 
 	return images
 
-def fetch(n, directory):
+def fetch(n):
 	"""
-	Fetch n last images to the given directory.
-	Trying to get 1920x1200 images first. If not found 1920x1080 images are fetched then
+	Fetch n last images.
+	Trying to get 1920x1200 images first, if not found 1920x1080 images are fetched then.
+	Also note that the 1920x1200 images are watersigned with the Bing logo, while 1920x1080 images are not.
 	"""
 	servers = ['az619822', 'az608707']
 	resolutions = ['1920x1200.jpg', '1920x1080.jpg']
@@ -44,12 +46,10 @@ def show_help(name):
 	print('Usage: python3 {} [OPTIONS]... '.format(name))
 	print('Fetch Bing Wallpaper images (according to the Bing\'s API restrictions fetching only the last 16 images is allowed)')
 	print('  -c, --count=[COUNT]\t\t\tThe number of images to fetch')
-	print('  -o, --output-directory=[DIRECTORY]\tOutput directory to put the images to')
+	print('  -d, --output-directory=[DIRECTORY]\tOutput directory to put the images to')
 
 if __name__ == '__main__':	
-	args = sys.argv[1:]
-
-	optlist, args = getopt.getopt(args, 'hc:o:', ['help', 'count=', 'output-directory='])
+	optlist, args = getopt.getopt(sys.argv[1:], 'hc:d:', ['help', 'count=', 'output-directory='])
 	
 	count = 1
 	directory = './'
@@ -62,5 +62,11 @@ if __name__ == '__main__':
 		elif opt in ('-d', '--output-directory'):
 			directory = arg
 
-	fetch(count, directory)
+	try:
+		os.chdir(directory)
+	except:
+		raise
+		sys.exit()
+
+	fetch(count)
 	print()
