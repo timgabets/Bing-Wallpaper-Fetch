@@ -5,46 +5,40 @@ import wget
 import sys
 import getopt
 
-images = {}
-servers = ['az619822', 'az608707']
+def get_image_names(n):
+	images = {}
+	url = 'http://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n={}&mkt=en-US'.format(n)
 
-#url_pattern='http://www.bing.com/HPImageArchive.aspx?format=js&idx={}&n={}&mkt=en-US'
-#
-#idx = 0
-#while idx < 50:
-#	url = url_pattern.format(idx, idx + 16)
-#	idx += 1
-#
-#	try:
-#		raw_data = urllib.request.urlopen(url).read().decode('utf-8')
-#		image_data = json.loads(raw_data)['images']
-#		
-#		for i in image_data:
-#			date = i['startdate']
-#			images[date] = i['url'].split('/')[-1].replace('1920x1080.jpg', '')
-#	except:
-#		break
-#
-#print(images)
-#
-#for date in images:
-#	url = 'http://{}.vo.msecnd.net/files/{}'.format(servers[0], images[date])
-#	try:
-#		filename = wget.download(url + '1920x1200.jpg')
-#		print('\nFetched image {}: {}'.format(date, filename))
-#	except:
-#		try:
-#			filename = wget.download(url + '1920x1080.jpg')
-#			print('\nFetched image {}: {}'.format(date, filename))
-#		except:
-#			print('Error getting image from {}: {}'.format(date, url))
-#
+	try:
+		raw_data = urllib.request.urlopen(url).read().decode('utf-8')
+		image_data = json.loads(raw_data)['images']
+			
+		for i in image_data:
+			date = i['startdate']
+			images[date] = i['url'].split('/')[-1].replace('1920x1080.jpg', '')
+	except:
+		raise
+
+	return images
 
 def fetch(n, directory):
 	"""
-	Fetch n last images to the given directory
+	Fetch n last images to the given directory.
+	Trying to get 1920x1200 images first. If not found 1920x1080 images are fetched then
 	"""
-	pass
+	servers = ['az619822', 'az608707']
+	resolutions = ['1920x1200.jpg', '1920x1080.jpg']
+	images = get_image_names(n)
+
+	for date in images:
+		for res in resolutions:
+			try:
+				url = 'http://{}.vo.msecnd.net/files/{}{}'.format(servers[0], images[date], res)
+				print('\nFetching image {}: {}'.format(date, url))
+				filename = wget.download(url)
+				break
+			except urllib.error.HTTPError as e:
+				print(e.code, e.reason)
 
 def show_help(name):
 	print('Usage: python3 {} [OPTIONS]... '.format(name))
@@ -69,3 +63,4 @@ if __name__ == '__main__':
 			directory = arg
 
 	fetch(count, directory)
+	print()
