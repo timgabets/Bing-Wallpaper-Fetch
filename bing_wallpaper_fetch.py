@@ -5,15 +5,21 @@ import wget
 import sys
 import getopt
 import os
+from collections import OrderedDict
 
 
 def get_image_names(n):
 	"""
 	Get the image data from the Bing API
 	"""
-	images = {}
-	url = 'http://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n={}&mkt=en-US'.format(n)
+	images = OrderedDict()
+	
+	if int(n) > 16 or int(n) < 0:
+		print('Wrong number of images to fetch: {}'.format(n))
+		print('Please note that due to the Bing\'s API limitation, only the last 16 images are available for download.')
+		sys.exit()
 
+	url = 'http://www.bing.com/HPImageArchive.aspx?format=js&idx={}&n={}&mkt=en-US'.format(0, n)
 	try:
 		raw_data = urllib.request.urlopen(url).read().decode('utf-8')
 		image_data = json.loads(raw_data)['images']
@@ -42,8 +48,9 @@ def fetch(n):
 		for res in resolutions:
 			try:
 				url = 'http://{}.vo.msecnd.net/files/{}{}'.format(servers[0], images[date], res)
-				print('\nFetching image {}: {}'.format(date, url))
+				print('Fetching image {}: {}'.format(date, url))
 				filename = wget.download(url)
+				print()
 				break
 			except urllib.error.HTTPError as e:
 				print(e.code, e.reason)
