@@ -6,7 +6,11 @@ import sys
 import getopt
 import os
 
+
 def get_image_names(n):
+	"""
+	Get the image data from the Bing API
+	"""
 	images = {}
 	url = 'http://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n={}&mkt=en-US'.format(n)
 
@@ -22,9 +26,11 @@ def get_image_names(n):
 
 	return images
 
+
 def fetch(n):
 	"""
-	Fetch n last images.
+	Fetch n last images from msecnd servers
+
 	Trying to get 1920x1200 images first, if not found 1920x1080 images are fetched then.
 	Also note that the 1920x1200 images are watersigned with the Bing logo, while 1920x1080 images are not.
 	"""
@@ -42,11 +48,16 @@ def fetch(n):
 			except urllib.error.HTTPError as e:
 				print(e.code, e.reason)
 
+
 def show_help(name):
+	"""
+	Show help and basic usage
+	"""
 	print('Usage: python3 {} [OPTIONS]... '.format(name))
 	print('Fetch Bing Wallpaper images (according to the Bing\'s API restrictions fetching only the last 16 images is allowed)')
 	print('  -c, --count=[COUNT]\t\t\tThe number of images to fetch')
 	print('  -d, --output-directory=[DIRECTORY]\tOutput directory to put the images to')
+
 
 if __name__ == '__main__':	
 	optlist, args = getopt.getopt(sys.argv[1:], 'hc:d:', ['help', 'count=', 'output-directory='])
