@@ -12,23 +12,25 @@ def get_image_names(n):
 	"""
 	Get the image data from the Bing API
 	"""
+	length = int(n)
 	images = OrderedDict()
-	
-	if int(n) > 16 or int(n) < 0:
-		print('Wrong number of images to fetch: {}'.format(n))
-		print('Please note that due to the Bing\'s API limitation, only the last 16 images are available for download.')
-		sys.exit()
 
-	url = 'http://www.bing.com/HPImageArchive.aspx?format=js&idx={}&n={}&mkt=en-US'.format(0, n)
-	try:
-		raw_data = urllib.request.urlopen(url).read().decode('utf-8')
-		image_data = json.loads(raw_data)['images']
-			
-		for i in image_data:
-			date = i['startdate']
-			images[date] = i['url'].split('/')[-1].replace('1920x1080.jpg', '')
-	except:
-		raise
+	idx = 0
+	while len(images) < length:
+		url = 'http://www.bing.com/HPImageArchive.aspx?format=js&idx={}&n={}&mkt=en-US'.format(idx * 8, idx * 8 + 8)
+		try:
+			raw_data = urllib.request.urlopen(url).read().decode('utf-8')
+			image_data = json.loads(raw_data)['images']
+				
+			for i in image_data:
+				if len(images) < length:	# As server always returns chunks of 8 images
+					date = i['startdate']
+					images[date] = i['url'].split('/')[-1].replace('1920x1080.jpg', '')
+				else:
+					break
+		except:
+			raise
+		idx += 1
 
 	return images
 
@@ -76,7 +78,17 @@ if __name__ == '__main__':
 			show_help(sys.argv[0])
 			sys.exit()
 		elif opt in ('-c', '--count'):
-			count = arg
+			try:
+				if int(arg) > 16 or int(arg) < 0:
+					print('Wrong number of images to fetch: {}'.format(arg))
+					print('Please note that due to the Bing\'s API limitation, only the last 16 images are available for download.')
+					sys.exit()
+				else:
+					count = arg				
+			except ValueError:
+				print('Invalid number of images to fetch: {}'.format(arg))
+				sys.exit()
+
 		elif opt in ('-d', '--output-directory'):
 			directory = arg
 
